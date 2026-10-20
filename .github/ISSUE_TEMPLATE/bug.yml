@@ -1,0 +1,17 @@
+name: 缺陷报告
+description: 提供可复现的脱敏信息
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤、期望结果、实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 版本、环境与 request_id（请勿粘贴密钥或私有源码）
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 修复验收与回归测试

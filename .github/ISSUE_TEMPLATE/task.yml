@@ -1,0 +1,32 @@
+name: 开发任务
+description: 从团队计划领取可验收任务
+body:
+  - type: input
+    id: task
+    attributes:
+      label: 任务 ID / 负责人 / 优先级 / 周次
+      placeholder: A-01 / A / P0 / W2
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 目标、范围与交付物
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: 依赖、输入输出与协作对象
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准与自动化测试
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: 风险、阻塞与不做事项

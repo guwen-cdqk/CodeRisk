@@ -1,0 +1,8 @@
+:root { font-family: system-ui, sans-serif; color: #192734; background: #f4f6f8; }
+main { max-width: 900px; margin: 3rem auto; padding: 1rem; }
+nav { display: flex; gap: 1rem; margin-bottom: 2rem; }
+button { cursor: pointer; padding: .6rem 1rem; border: 1px solid #aab7c4; border-radius: 4px; background: white; }
+article { padding: 1rem; margin: 1rem 0; background: white; border: 1px solid #d3dce5; }
+[role="note"] { padding: 1rem; background: #fff3cd; }
+[role="alert"] { color: #9c2121; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; }
