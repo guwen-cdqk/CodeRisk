@@ -1,11 +1,11 @@
 name: 开发任务
-description: 从团队计划领取可验收任务
+description: 按团队开发指南领取一个可验收任务
 body:
   - type: input
     id: task
     attributes:
-      label: 任务 ID / 负责人 / 优先级 / 周次
-      placeholder: A-01 / A / P0 / W2
+      label: 任务 ID / 角色 / 优先级 / 本次汇报目标
+      placeholder: A-01 / A / P0 / 完成 PR 快照获取与离线测试
     validations:
       required: true
   - type: textarea

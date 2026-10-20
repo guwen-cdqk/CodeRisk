@@ -19,10 +19,8 @@ dist/
 playwright-report/
 test-results/
 
-# Local planning and delivery records; keep on disk, never commit.
-/docs/team-tasks.md
-/docs/verification.md
-/docs/file-manifest.md
+# Personal notes and local artifacts; shared engineering docs are tracked.
+/docs/local/
 /work/
 /outputs/
 *.zip
