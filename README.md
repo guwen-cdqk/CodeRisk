@@ -4,15 +4,41 @@
 
 **当前是工程骨架：后端和前端可在 Mock 模式运行；真实 GitHub、Diff/AST、AI 调用、任务协调和数据库尚未实现。**
 
-## 团队开发入口
+<a id="documentation"></a>
 
-请先阅读 [团队开发指南](docs/team-development-guide.md)。这是项目唯一的综合开发说明，包含：
+## 文档导航
 
-- 架构和现有文件逐项说明，以及已实现 / 待实现边界。
-- A 后端与 GitHub、B 代码分析、C AI 审查、D 前端与测试部署的具体任务。
-- 公共模型、Python 接口、HTTP API、输入输出示例和错误约定。
-- 每个角色的首个 PR、交付物、单元测试、联调和验收方法。
-- 未来五周的参考目标及每周汇报方式，不按固定周次强制执行。
+文档更新：2026-10-25。已确定方向与待讨论的实现方案分开记录，具体细则以决策记录为准。
+建议阅读：**需求 → 架构 → 自己的角色任务**，开发时按需查接口、协作流程和待决议事项。
+
+| 文档 | 主要内容 |
+|---|---|
+| [项目需求](docs/requirements.md) | 做什么、解决什么问题、怎样使用、首版范围与潜在创新 |
+| [架构概览](docs/architecture.md) | 系统组成、数据流、现有文件与待实现模块 |
+| [数据与接口](docs/interfaces.md) | 公共模型用途、位置约定、模块调用、HTTP 和共同样例 |
+| [开发与协作](docs/development.md) | 开始开发、PR、测试联调、五周参考和部署流程 |
+| [决策记录](docs/decisions.md) | 已确定方向、待讨论的接口/预算/部署方案 |
+| [A：后端与 GitHub](docs/roles/a-backend-github.md) | PR 获取、Webhook、任务协调、存储与评论 |
+| [B：代码分析](docs/roles/b-code-analysis.md) | Diff、AST、函数定位、静态规则 |
+| [C：AI 审查](docs/roles/c-ai-review.md) | 模型适配、证据校验、质量与架构协调 |
+| [D：前端与测试部署](docs/roles/d-frontend-testing.md) | 页面、API、集成/E2E、CI 和部署 |
+
+每条规则只在所属文档维护，角色文档引用公共约定。需求中的“作者/审查者/维护者”是使用角色，A/B/C/D 是开发分工。
+拟议方案不代表现有功能，业务代码尚未因此改动。
+
+```text
+docs/
+├── requirements.md
+├── architecture.md
+├── interfaces.md
+├── development.md
+├── decisions.md
+└── roles/
+    ├── a-backend-github.md
+    ├── b-code-analysis.md
+    ├── c-ai-review.md
+    └── d-frontend-testing.md
+```
 
 ## 本地启动
 

@@ -1,5 +1,5 @@
 name: 开发任务
-description: 按团队开发指南领取一个可验收任务
+description: 按需求与开发文档领取一个可验收任务
 body:
   - type: input
     id: task
