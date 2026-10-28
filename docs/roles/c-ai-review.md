@@ -1,6 +1,6 @@
 # C：AI 审查与架构协调
 
-更新：2026-10-25。
+更新：2026-10-29。
 [文档导航](../../README.md#documentation) · [架构](../architecture.md) · [公共接口](../interfaces.md) · [协作流程](../development.md)
 
 ## 1. 我负责什么
@@ -14,6 +14,9 @@
 先读 `backend/app/schemas/models.py`、`services/contracts.py` 和 `core/errors.py`；与 A 确定模型服务的配置入口。
 按需创建 `reviewers/ai_reviewer.py`、`provider.py`、`prompts.py`、fake 与 `backend/tests/` 中的模型响应测试。
 公共字段由 C 协调但不独自决定；消费方和实现者共同 Review。
+
+C-01 分支已经提供 [FakeReviewer](../../backend/app/reviewers/fake.py)、[共同 JSON 样例](../../backend/tests/fixtures/review_example.json)和 [11 个新增用例](../../backend/tests/test_reviewer.py)。
+调用方法与限制见 [接口文档示例](../interfaces.md#fake-reviewer)。尚未接入真实 provider 或 HTTP 协调流程，其他任务继续按下面安排推进。
 
 ## 3. 当前阶段任务
 
