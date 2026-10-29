@@ -36,7 +36,8 @@
 
 ## 3. Python 模块调用
 
-下面是当前 Protocol 的方法摘要，没有真实实现。详细参数和返回类型直接查 [契约代码](../backend/app/services/contracts.py)。
+下面是当前 Protocol 的方法摘要；A-01 已提供独立的 [fetch_pull_request 实现](a01-github-fetch.md)，
+其余端口仍待实现。详细参数和返回类型直接查 [契约代码](../backend/app/services/contracts.py)。
 
 | Protocol / 方法 | 输入 → 输出 | 实现者与边界 |
 |---|---|---|
