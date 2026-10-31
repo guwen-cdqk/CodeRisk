@@ -2,7 +2,8 @@
 
 基于 Python 代码变更分析的 AI Pull Request 风险审查系统。
 
-**当前是工程骨架：后端和前端可在 Mock 模式运行；真实 GitHub、Diff/AST、AI 调用、任务协调和数据库尚未实现。**
+**后端和前端可在 Mock 模式运行；A-01 GitHub 快照适配器已实现并有离线测试，尚未接入 HTTP 流程。
+Diff/AST、AI 调用、任务协调和数据库仍待实现。**
 
 <a id="documentation"></a>
 
@@ -19,6 +20,7 @@
 | [开发与协作](docs/development.md) | 开始开发、PR、测试联调、五周参考和部署流程 |
 | [决策记录](docs/decisions.md) | 已确定方向、待讨论的接口/预算/部署方案 |
 | [A：后端与 GitHub](docs/roles/a-backend-github.md) | PR 获取、Webhook、任务协调、存储与评论 |
+| [A-01 适配器说明](docs/a01-github-fetch.md) | 配置、快照校验、错误策略与支持范围 |
 | [B：代码分析](docs/roles/b-code-analysis.md) | Diff、AST、函数定位、静态规则 |
 | [C：AI 审查](docs/roles/c-ai-review.md) | 模型适配、证据校验、质量与架构协调 |
 | [D：前端与测试部署](docs/roles/d-frontend-testing.md) | 页面、API、集成/E2E、CI 和部署 |
@@ -80,7 +82,7 @@ npm run dev
 ```
 
 在 `frontend/` 执行 `npm run build`，同时检查 TypeScript 和构建。
-后端目前有 15 个基础测试；完整浏览器 E2E 和真实业务闭环仍待开发。
+后端包含基础测试和 A-01 离线 HTTP 测试；完整浏览器 E2E 和真实业务闭环仍待开发。
 
 ## 工程约定
 

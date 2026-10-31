@@ -1,5 +1,6 @@
 # Python 3.12 verified environment. Includes dev tools; no local editable paths.
 # colorama is needed on Windows and safe to install on Linux.
+# A-01: re-resolved with uv; httpx is now a runtime dependency, pins unchanged.
 annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1
