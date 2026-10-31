@@ -1,6 +1,6 @@
 # 数据与接口约定
 
-更新：2026-10-25。本文解释接口用途和共同约定，字段与签名以 [models.py](../backend/app/schemas/models.py) 和 [contracts.py](../backend/app/services/contracts.py) 为准。
+更新：2026-10-31。本文解释接口用途和共同约定，字段与签名以 [models.py](../backend/app/schemas/models.py) 和 [contracts.py](../backend/app/services/contracts.py) 为准。
 修改公共接口由 C 协调，A/B/C/D 中受影响的消费方共同评审，同步文档、fixture 和 TS 类型。
 
 ## 1. 各模块传什么数据
@@ -37,7 +37,7 @@
 ## 3. Python 模块调用
 
 下面是当前 Protocol 的方法摘要；A-01 已提供独立的 [fetch_pull_request 实现](a01-github-fetch.md)，
-其余端口仍待实现。详细参数和返回类型直接查 [契约代码](../backend/app/services/contracts.py)。
+C-01 提供第 5 节的 FakeReviewer，其余真实业务端口仍待实现。详细参数和返回类型直接查 [契约代码](../backend/app/services/contracts.py)。
 
 | Protocol / 方法 | 输入 → 输出 | 实现者与边界 |
 |---|---|---|
@@ -65,7 +65,7 @@ B 的同步分析由 A 放在线程执行；async 本身不会自动把 CPU 工�
 | POST /api/v1/tasks/{task_id}/retry | 未注册，404 | 拟议接口，见 [Q-07](decisions.md#q07) |
 
 OpenAPI 虽声明 POST /reviews 的成功模型为 202，目前函数仍返回 501。关闭 Mock 后读取为 503；A 还需替换 store_for 和依赖装配。
-目标还包含服务端允许仓库检查；它尚未实现。前端不传令牌或任意抓取 URL。
+A-01 适配器已实施服务端允许仓库检查；HTTP 提交入口尚未装配该适配器。前端不传令牌或任意抓取 URL。
 
 错误统一为：
 
@@ -76,43 +76,43 @@ OpenAPI 虽声明 POST /reviews 的成功模型为 202，目前函数仍返回 5
 X-Request-ID 响应头与错误体相同，由服务端生成。当前 404/422/500/501/503 已声明此模型，未来 401/403/409/502 等需 A 补齐。
 TypeScript 当前是展示字段子集，D 需补 error/diagnostics 和已评审的新状态；不能凭页面需要擅自改字段名。
 
-## 5. 共同样例：没有其他模块也能检查数据格式
+<a id="fake-reviewer"></a>
 
-以下可在安装后端后运行，只创建合成数据，没有执行待审代码或调用真实服务。
-成员按此思路共享 fixture；B 补人工定位，C 补模型响应，D 复用页面数据。不要各维护一套含义不同的同一 PR。
-示例对应当前模型；Q-05 接口升级获批后再同步修改。
+## 5. C-01：复用共同样例和 Fake Reviewer
+
+共同数据保存在 [review_example.json](../backend/tests/fixtures/review_example.json)：
+task 供页面展示，pull_request 供 A/B 使用，analysis 是人工标注的合成结果，report 是固定时间的 Mock 展示样例。
+这不是运行分析器或模型得到的结果。修改样例时同步测试，避免各模块维护不同版本。
+
+后端安装后，从仓库根目录运行以下代码，不需要 Key：
 
 ```python
-from uuid import UUID
-from app.schemas.models import PullRequestData, AnalysisResult, ReviewReport
+import asyncio
+import json
+from pathlib import Path
 
-pr = PullRequestData(
-    repository="demo/coderisk", number=1, title="Example change",
-    base_ref="main", head_ref="feature/demo",
-    base_sha="b" * 40, head_sha="a" * 40,
-    files=[{
-        "path": "src/parser.py", "status": "modified",
-        "patch": "@@ -1,2 +1,2 @@\n def parse(text):\n-    return text\n+    return eval(text)\n",
-        "old_content": "def parse(text):\n    return text\n",
-        "new_content": "def parse(text):\n    return eval(text)\n",
-    }],
-)
-analysis = AnalysisResult(
-    head_sha=pr.head_sha, status="complete",
-    findings=[{
-        "category": "unsafe_dynamic_execution", "severity": "high",
-        "location": {"path": "src/parser.py", "side": "new", "start_line": 2, "end_line": 2},
-        "reason": "Untrusted input may execute code.", "evidence": "return eval(text)",
-        "suggestion": "Use a parser for the expected input format.",
-        "source": "static", "rule_id": "PY-EVAL-001",
-    }],
-)
-report = ReviewReport(
-    task_id=UUID("00000000-0000-4000-8000-000000000001"),
-    head_sha=pr.head_sha, status="completed",
-    summary="MOCK: synthetic data; no analyzer or LLM called.",
-    findings=analysis.findings, is_mock=True,
-)
+from app.reviewers.fake import FakeReviewer
+from app.schemas.models import AnalysisResult, PullRequestData, ReviewReport, ReviewTask
+from app.services.contracts import AIReviewer
+
+sample = json.loads(Path("backend/tests/fixtures/review_example.json").read_text("utf-8"))
+task = ReviewTask.model_validate(sample["task"])
+pr = PullRequestData.model_validate(sample["pull_request"])
+analysis = AnalysisResult.model_validate(sample["analysis"])
+reviewer: AIReviewer = FakeReviewer()
+report = asyncio.run(reviewer.review(task.id, pr, analysis))
+assert report.is_mock and report.task_id == task.id
+assert report.head_sha == pr.head_sha and report.findings == analysis.findings
 assert ReviewReport.model_validate_json(report.model_dump_json()) == report
 print(report.model_dump_json(indent=2))
 ```
+
+A 在自己的异步协调器中使用 `await reviewer.review(task.id, pr, analysis)`，不要在已有事件循环内调用 asyncio.run。
+Fake 对不匹配 SHA 抛 ANALYSIS_SHA_MISMATCH，对整体分析 failed 抛 ANALYSIS_FAILED；两者都是不可重试的 ModuleError（422）。
+正常返回 is_mock=true，深拷贝上游发现和诊断，不生成新的 AI 发现，不检查证据真实性，也不执行任何 PR 内容。
+
+partial 输入保留结果并追加 MOCK_PARTIAL_ANALYSIS；summary 明确不完整。此时 completed 仅表示 Fake 调用完成，不代表真实 AI 或完整覆盖。
+正式降级状态仍待 Q-05 升级，本次不修改公共 Schema。所有 Mock 结果仅供联调，不得当成真实审查结论发布。
+真实调用的 generated_at 使用当前时间；JSON 中 report 的时间固定供展示，不能假定完整 JSON 每次字节相同。
+
+HTTP 仍使用原 MockReadStore；本次没有接通 POST /reviews、分析器、模型、数据库或 GitHub 评论。由 A 后续装配注入。

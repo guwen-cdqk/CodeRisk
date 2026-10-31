@@ -1,0 +1,95 @@
+{
+  "description": "Synthetic, manually annotated contract fixture. No analyzer or LLM ran; code is text only.",
+  "task": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "repository": "demo/coderisk",
+    "pr_number": 1,
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "status": "completed",
+    "publication_status": "not_requested",
+    "is_mock": true,
+    "created_at": "2026-01-01T00:00:00Z"
+  },
+  "pull_request": {
+    "repository": "demo/coderisk",
+    "number": 1,
+    "title": "Example parser change",
+    "base_ref": "main",
+    "head_ref": "feature/parser",
+    "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fetched_at": "2026-01-01T00:00:00Z",
+    "files": [
+      {
+        "path": "src/parser.py",
+        "status": "modified",
+        "patch": "@@ -1,2 +1,2 @@\n def parse(text):\n-    return text\n+    return eval(text)\n",
+        "patch_truncated": false,
+        "old_content": "def parse(text):\n    return text\n",
+        "new_content": "def parse(text):\n    return eval(text)\n"
+      }
+    ]
+  },
+  "analysis": {
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "status": "complete",
+    "functions": [
+      {
+        "qualified_name": "parse",
+        "location": {
+          "path": "src/parser.py",
+          "side": "new",
+          "start_line": 1,
+          "end_line": 2
+        },
+        "context": "def parse(text):\n    return eval(text)\n"
+      }
+    ],
+    "findings": [
+      {
+        "category": "unsafe_dynamic_execution",
+        "severity": "high",
+        "location": {
+          "path": "src/parser.py",
+          "side": "new",
+          "start_line": 2,
+          "end_line": 2
+        },
+        "reason": "Untrusted input may execute code.",
+        "evidence": "return eval(text)",
+        "suggestion": "Use a parser for the expected input format.",
+        "source": "static",
+        "rule_id": "PY-EVAL-001"
+      }
+    ],
+    "diagnostics": []
+  },
+  "report": {
+    "task_id": "00000000-0000-4000-8000-000000000001",
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "status": "completed",
+    "summary": "MOCK：未执行 AI 审查，仅保留上游发现；空发现不代表代码安全。",
+    "findings": [
+      {
+        "category": "unsafe_dynamic_execution",
+        "severity": "high",
+        "location": {
+          "path": "src/parser.py",
+          "side": "new",
+          "start_line": 2,
+          "end_line": 2
+        },
+        "reason": "Untrusted input may execute code.",
+        "evidence": "return eval(text)",
+        "suggestion": "Use a parser for the expected input format.",
+        "source": "static",
+        "rule_id": "PY-EVAL-001"
+      }
+    ],
+    "diagnostics": [
+      {"code": "MOCK_REVIEWER", "message": "No LLM was called; upstream findings only."}
+    ],
+    "is_mock": true,
+    "generated_at": "2026-01-01T00:00:00Z"
+  }
+}

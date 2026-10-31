@@ -1,6 +1,6 @@
 # 架构概览
 
-更新：2026-10-25。先读 [项目需求](requirements.md)，再按本文找到自己的开发位置。
+更新：2026-10-29。先读 [项目需求](requirements.md)，再按本文找到自己的开发位置。
 
 ## 1. 系统由什么组成
 
@@ -26,7 +26,7 @@ flowchart TD
 ## 2. 目前哪些已经可以运行
 
 已有 FastAPI 入口、健康检查、环境配置、日志和统一错误；公共模型和接口约定已经定义。
-网页可以展示一个固定 Mock 任务及报告，后端有基础与 GitHub 适配器离线测试，仓库有 CI 和 Docker 配置。
+网页可以展示一个固定 Mock 任务及报告；已有 A-01 快照适配器、独立 Fake Reviewer 与共同样例，以及对应离线测试、CI 和 Docker 配置。
 
 A-01 已提供独立的 [GitHub 快照适配器](a01-github-fetch.md)，尚未装配到 HTTP 流程；
 任务协调器、数据库、Diff/AST 和 LLM 仍未实现。合法提交请求仍返回 501；关闭 Mock 后查询返回 503，不会自动启用真实服务。
@@ -45,6 +45,8 @@ Docker 配置尚未完成启动实测，完整业务和浏览器 E2E 仍待实�
 | `backend/app/schemas/models.py` | 模块之间交换的数据结构及校验 | C 协调，消费方共同 Review |
 | `backend/app/services/contracts.py` | 模块方法和输入输出的 Protocol 约定 | C 协调，各实现者维护 |
 | `backend/app/services/mock_store.py` | 固定示例，只供联调，不是持久化适配器 | A/D |
+| `backend/app/reviewers/fake.py` | 无网络的 AIReviewer 替代实现，保留上游发现，不生成真实 AI 意见 | C |
+| `backend/tests/fixtures/review_example.json` | 合成 PR、人工标注分析、Mock 任务与报告，共同联调数据 | C 协调，A/B/D 复用 |
 | `backend/tests/` | 各模块及接口测试 | 作者写自己模块测试，D 补集成 |
 | `frontend/src/main.tsx`、`style.css` | 当前页面、简单导航和样式 | D |
 | `frontend/src/api.ts` | HTTP client 与当前展示用 TS 类型 | D，与 A/C 核对 |
