@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     app_name: str = "CodeRisk"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     mock_enabled: bool = True
+    github_allowed_repositories: frozenset[str] = frozenset()
 
 
 def configure_logging(level: str) -> None:

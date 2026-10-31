@@ -65,7 +65,8 @@ C 汇总协调，接口变化和阻塞及时沟通，不等周会。不用“完
 
 ## 6. 配置、数据和安全
 
-当前后端读取 CODERISK_APP_NAME、CODERISK_LOG_LEVEL、CODERISK_MOCK_ENABLED；根 .env 与环境变量生效，环境变量优先，改后重启。
+当前后端读取 CODERISK_APP_NAME、CODERISK_LOG_LEVEL、CODERISK_MOCK_ENABLED，另有 A-01 的
+[CODERISK_GITHUB_ALLOWED_REPOSITORIES](a01-github-fetch.md#使用与配置)；根 .env 与环境变量生效，环境变量优先，改后重启。
 GITHUB_TOKEN、GITHUB_WEBHOOK_SECRET、LLM_API_KEY/BASE_URL/MODEL 只是 .env.example 的预留项，尚未实现读取。
 Vite 代理使用启动进程的 CODERISK_API_TARGET，默认本机 8000；不假设后端 .env 自动传给前端。
 

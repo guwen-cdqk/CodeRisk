@@ -13,7 +13,8 @@
 先读 `backend/app/services/contracts.py`、`schemas/models.py` 和 `api/routes/reviews.py`。
 现有 `main.py` 是装配入口，`core/config.py`、`core/errors.py` 提供配置和错误基线。
 按需创建 `integrations/github.py`、`api/routes/webhooks.py`、`services/coordinator.py`、`db/sqlite.py` 和对应测试。
-这些业务文件尚未实现；不要直接把 MockReadStore 当作正式数据库扩充。
+A-01 已提供 GitHub 获取适配器，配置、校验策略与支持限制见 [实现说明](../a01-github-fetch.md)。
+其余业务文件尚未实现；不要直接把 MockReadStore 当作正式数据库扩充。
 
 ## 3. 当前阶段任务
 
