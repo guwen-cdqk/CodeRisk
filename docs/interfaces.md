@@ -1,6 +1,6 @@
 # 数据与接口约定
 
-更新：2026-10-29。本文解释接口用途和共同约定，字段与签名以 [models.py](../backend/app/schemas/models.py) 和 [contracts.py](../backend/app/services/contracts.py) 为准。
+更新：2026-10-31。本文解释接口用途和共同约定，字段与签名以 [models.py](../backend/app/schemas/models.py) 和 [contracts.py](../backend/app/services/contracts.py) 为准。
 修改公共接口由 C 协调，A/B/C/D 中受影响的消费方共同评审，同步文档、fixture 和 TS 类型。
 
 ## 1. 各模块传什么数据
@@ -37,7 +37,7 @@
 ## 3. Python 模块调用
 
 下面是当前 Protocol 的方法摘要；A-01 已提供独立的 [fetch_pull_request 实现](a01-github-fetch.md)，
-其余端口仍待实现。详细参数和返回类型直接查 [契约代码](../backend/app/services/contracts.py)。
+C-01 提供第 5 节的 FakeReviewer，其余真实业务端口仍待实现。详细参数和返回类型直接查 [契约代码](../backend/app/services/contracts.py)。
 
 | Protocol / 方法 | 输入 → 输出 | 实现者与边界 |
 |---|---|---|
@@ -65,7 +65,7 @@ B 的同步分析由 A 放在线程执行；async 本身不会自动把 CPU 工�
 | POST /api/v1/tasks/{task_id}/retry | 未注册，404 | 拟议接口，见 [Q-07](decisions.md#q07) |
 
 OpenAPI 虽声明 POST /reviews 的成功模型为 202，目前函数仍返回 501。关闭 Mock 后读取为 503；A 还需替换 store_for 和依赖装配。
-目标还包含服务端允许仓库检查；它尚未实现。前端不传令牌或任意抓取 URL。
+A-01 适配器已实施服务端允许仓库检查；HTTP 提交入口尚未装配该适配器。前端不传令牌或任意抓取 URL。
 
 错误统一为：
 
