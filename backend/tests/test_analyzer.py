@@ -101,3 +101,74 @@ def test_parsing_is_deterministic(name: str) -> None:
     assert first.added_line_numbers == second.added_line_numbers
     assert first.removed_line_numbers == second.removed_line_numbers
     assert codes(first) == codes(second)
+
+
+# --- PR #2 review 回归：非法输入、hunk 计数校验、数字溢出 ----------------------
+# 对应 guwen-cdqk 在 PR #2 上的三条 P2 意见。
+
+
+def test_illegal_nonempty_patch_reports_diagnostic() -> None:
+    """① 非空但认不出来的输入，必须能和「确实没有变更」区分开。"""
+    parsed = parse_patch("demo.py", "not a diff")
+    assert parsed.hunks == ()
+    assert parsed.added_line_numbers == []
+    assert codes(parsed) == {"PATCH_UNRECOGNIZED"}
+
+
+def test_legal_header_without_hunk_stays_quiet() -> None:
+    """① 的反例：合法文件头但没有 hunk（空改动/纯元数据）不该报错。"""
+    patch = "diff --git a/demo.py b/demo.py\n--- a/demo.py\n+++ b/demo.py\n"
+    parsed = parse_patch("demo.py", patch)
+    assert parsed.hunks == ()
+    assert codes(parsed) == set()
+
+
+def test_malformed_hunk_header_is_diagnosed() -> None:
+    """长得像 hunk 头却解析不了，也不能静默跳过。"""
+    parsed = parse_patch("demo.py", "@@ 这不是合法的 hunk 头 @@\n")
+    assert parsed.hunks == ()
+    assert "HUNK_HEADER_INVALID" in codes(parsed)
+
+
+def test_hunk_overrun_is_diagnosed() -> None:
+    """②-1 超出声明数量的行不能被静默丢掉，但已解析的行要保留。"""
+    patch = "@@ -1 +1 @@\n-old\n+new\n+extra\n"
+    parsed = parse_patch("demo.py", patch)
+    assert "HUNK_LINE_OVERFLOW" in codes(parsed)
+    assert parsed.removed_line_numbers == [1]
+    # 合法的 +new 仍在；+extra 不产生第 2 行
+    assert parsed.added_line_numbers == [1]
+
+
+def test_zero_count_side_rejects_addition() -> None:
+    """②-2 new_count=0 的一侧不能再产出新增行。"""
+    patch = "@@ -1,1 +1,0 @@\n+unexpected\n-old\n"
+    parsed = parse_patch("demo.py", patch)
+    assert "HUNK_LINE_OVERFLOW" in codes(parsed)
+    assert parsed.added_line_numbers == []
+    assert parsed.removed_line_numbers == [1]
+
+
+def test_zero_start_is_diagnosed() -> None:
+    """②-3 非零 count 的起点为 0 属于非法位置，不能返回第 0 行。"""
+    patch = "@@ -0,1 +1,1 @@\n-old\n+new\n"
+    parsed = parse_patch("demo.py", patch)
+    assert "HUNK_HEADER_INVALID" in codes(parsed)
+    assert parsed.hunks == ()
+    assert parsed.removed_line_numbers == []
+
+
+def test_new_file_hunk_with_zero_start_is_legal() -> None:
+    """②-3 的例外：新增文件用 -0,0，count 为 0 时起点 0 是合法的。"""
+    patch = "@@ -0,0 +1,2 @@\n+first\n+second\n"
+    parsed = parse_patch("demo.py", patch)
+    assert codes(parsed) == set()
+    assert parsed.added_line_numbers == [1, 2]
+
+
+def test_huge_hunk_number_does_not_raise() -> None:
+    """③ 超长数字要转成诊断，不能抛 ValueError。"""
+    patch = "@@ -" + "9" * 5000 + " +1 @@\n-old\n+new\n"
+    parsed = parse_patch("demo.py", patch)
+    assert parsed.hunks == ()
+    assert "HUNK_HEADER_INVALID" in codes(parsed)
