@@ -1,0 +1,5 @@
+@@ -1,2 +1,4 @@
+ def total(items):
++    if not items:
++        return 0
+     result = 0

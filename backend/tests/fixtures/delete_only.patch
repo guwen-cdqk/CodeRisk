@@ -1,0 +1,5 @@
+@@ -7,4 +7,2 @@ def helper():
+     start = 0
+-    unused = 1
+-    unused += 2
+     return start

@@ -1,0 +1,10 @@
+@@ -3,3 +3,4 @@ def alpha():
+     a = 1
++    a += 1
+     b = 2
+     return a + b
+@@ -20,3 +21,3 @@ def beta():
+     x = 1
+-    y = 2
++    y = 3
+     return x + y
