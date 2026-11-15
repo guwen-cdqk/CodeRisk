@@ -137,9 +137,6 @@ def parse_patch(path: str, patch: str | None, *, truncated: bool = False) -> Par
     raw_lines = patch.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     hunks: list[Hunk] = []
     index = 0
-    # 是否见过 diff 的合法结构：认得的元数据行、合法的 hunk 头，
-    # 或以 @@ 开头但畸形的 hunk 头。
-    structure_seen = False
     # 完全认不出来、又不是空行的行数
     stray_lines = 0
 
@@ -152,7 +149,6 @@ def parse_patch(path: str, patch: str | None, *, truncated: bool = False) -> Par
                 index += 1
             elif line.startswith("@@"):
                 # 长得像 hunk 头却匹配不上，不能静默跳过
-                structure_seen = True
                 diagnostics.append(
                     Diagnostic(
                         code="HUNK_HEADER_INVALID",
@@ -163,14 +159,12 @@ def parse_patch(path: str, patch: str | None, *, truncated: bool = False) -> Par
                 index += 1
             elif _is_metadata(line):
                 # ---/+++ 文件头、diff --git、index 等，没有 hunk 也可能是合法的
-                structure_seen = True
                 index += 1
             else:
                 stray_lines += 1
                 index += 1
             continue
 
-        structure_seen = True
         old_start = _to_int(match.group(1))
         old_count = _to_int(match.group(2))
         new_start = _to_int(match.group(3))
@@ -290,12 +284,12 @@ def parse_patch(path: str, patch: str | None, *, truncated: bool = False) -> Par
 
         hunks.append(Hunk(old_start, old_count, new_start, new_count, section, tuple(body)))
 
-    if not hunks and stray_lines and not structure_seen:
-        # 没有任何可识别结构，却又有非空内容：不是"没有变更"，是根本没解析出来
+    if stray_lines:
+        # 合法文件头或已解析 hunk 不能掩盖其他无法识别的非空内容。
         diagnostics.append(
             Diagnostic(
                 code="PATCH_UNRECOGNIZED",
-                message=f"输入不是可识别的 unified diff（{stray_lines} 行无法识别）",
+                message=f"unified diff 有 {stray_lines} 行无法识别，已保留可解析部分",
                 path=path,
             )
         )

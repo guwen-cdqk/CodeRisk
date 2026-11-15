@@ -45,6 +45,7 @@ def test_line_numbers(name: str, added: list[int], removed: list[int]) -> None:
 def test_counts_match_declared(name: str) -> None:
     parsed = parse_patch("demo.py", load(name))
     assert parsed.hunks
+    assert not parsed.diagnostics
     for hunk in parsed.hunks:
         assert hunk.new_count == sum(1 for line in hunk.lines if line.kind != "removed")
         assert hunk.old_count == sum(1 for line in hunk.lines if line.kind != "added")
@@ -172,3 +173,19 @@ def test_huge_hunk_number_does_not_raise() -> None:
     parsed = parse_patch("demo.py", patch)
     assert parsed.hunks == ()
     assert "HUNK_HEADER_INVALID" in codes(parsed)
+
+
+@pytest.mark.parametrize(
+    ("patch", "changed"),
+    [
+        ("diff --git a/demo.py b/demo.py\n--- a/demo.py\n+++ b/demo.py\nnot a diff\n", []),
+        ("@@ -1 +1 @@\n-old\n+new\n\n+extra\n", [1]),
+        ("@@ -1 +1 @@\n-old\n+new\ninvalid\n", [1]),
+    ],
+    ids=["header-with-garbage", "extra-change-after-empty-line", "hunk-with-garbage"],
+)
+def test_unrecognized_content_is_diagnosed_without_losing_valid_hunks(patch, changed) -> None:
+    parsed = parse_patch("demo.py", patch)
+    assert "PATCH_UNRECOGNIZED" in codes(parsed)
+    assert parsed.added_line_numbers == parsed.removed_line_numbers == changed
+    assert all(item.path == "demo.py" for item in parsed.diagnostics)
