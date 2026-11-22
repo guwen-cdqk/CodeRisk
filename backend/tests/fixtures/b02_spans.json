@@ -1,0 +1,11 @@
+{
+  "description": "Manually annotated lexical spans; changed lines 3, 6, 9, 12 on both sides.",
+  "old": "class Service:\n    @property\n    def value(self):\n        return 1\n\ndef outer(flag=True):\n    @decorate\n    async def inner():\n        return 2\n    return inner\n\nsetting = 1\n",
+  "new": "class Service:\n    @property\n    def value(self, extra=None):\n        return 1\n\ndef outer(flag=False):\n    @decorate\n    async def inner():\n        return 3\n    return inner\n\nsetting = 2\n",
+  "expected": [
+    {"name": "Service.value", "start": 2, "end": 4},
+    {"name": "outer", "start": 6, "end": 10},
+    {"name": "outer.inner", "start": 7, "end": 9}
+  ],
+  "top_level_lines": [12]
+}

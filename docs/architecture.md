@@ -1,6 +1,6 @@
 # 架构概览
 
-更新：2026-10-29。先读 [项目需求](requirements.md)，再按本文找到自己的开发位置。
+更新：2026-11-15。先读 [项目需求](requirements.md)，再按本文找到自己的开发位置。
 
 ## 1. 系统由什么组成
 
@@ -29,7 +29,8 @@ flowchart TD
 网页可以展示一个固定 Mock 任务及报告；已有 A-01 快照适配器、独立 Fake Reviewer 与共同样例，以及对应离线测试、CI 和 Docker 配置。
 
 A-01 已提供独立的 [GitHub 快照适配器](a01-github-fetch.md)，尚未装配到 HTTP 流程；
-任务协调器、数据库、Diff/AST 和 LLM 仍未实现。合法提交请求仍返回 501；关闭 Mock 后查询返回 503，不会自动启用真实服务。
+B-01 已提供文件级 Diff 解析，B-02 已提供独立 [AST 函数定位与上下文](b02-python-ast.md)。
+任务协调器、数据库、B-03 静态规则与统一 analyzer、真实 LLM 仍待实现。合法提交请求仍返回 501；关闭 Mock 后查询返回 503，不会自动启用真实服务。
 Docker 配置尚未完成启动实测，完整业务和浏览器 E2E 仍待实现。现有测试不代表这些业务已验证。
 
 ## 3. 当前文件分别做什么
@@ -44,6 +45,7 @@ Docker 配置尚未完成启动实测，完整业务和浏览器 E2E 仍待实�
 | `backend/app/core/errors.py` | 可安全向调用方展示的公共模块异常 | C 协调，全员使用 |
 | `backend/app/schemas/models.py` | 模块之间交换的数据结构及校验 | C 协调，消费方共同 Review |
 | `backend/app/services/contracts.py` | 模块方法和输入输出的 Protocol 约定 | C 协调，各实现者维护 |
+| `backend/app/analyzers/diff.py`、`python_ast.py` | B-01 两侧变更行、B-02 AST 定位与有限上下文；尚未装配 HTTP | B |
 | `backend/app/services/mock_store.py` | 固定示例，只供联调，不是持久化适配器 | A/D |
 | `backend/app/reviewers/fake.py` | 无网络的 AIReviewer 替代实现，保留上游发现，不生成真实 AI 意见 | C |
 | `backend/tests/fixtures/review_example.json` | 合成 PR、人工标注分析、Mock 任务与报告，共同联调数据 | C 协调，A/B/D 复用 |
@@ -59,7 +61,7 @@ main.py 只做装配，路由只处理 HTTP；不要把解析器或提示词逻�
 
 ## 4. 业务开始实现时再创建的目录
 
-下面是建议落点，当前尚不存在。内部文件名可以调整，公共接口需要共同评审。
+下面是业务模块建议落点；GitHub 适配器、Diff/AST 与 Fake Reviewer 已存在，其余按任务创建。公共接口需要共同评审。
 
 ```text
 backend/app/
