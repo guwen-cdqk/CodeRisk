@@ -14,7 +14,7 @@
 现有 `main.py` 是装配入口，`core/config.py`、`core/errors.py` 提供配置和错误基线。
 按需创建 `integrations/github.py`、`api/routes/webhooks.py`、`services/coordinator.py`、`db/sqlite.py` 和对应测试。
 A-01 已提供 GitHub 获取适配器，配置、校验策略与支持限制见 [实现说明](../a01-github-fetch.md)。
-其余业务文件尚未实现；不要直接把 MockReadStore 当作正式数据库扩充。
+A-02 已提供 [Webhook 接收与离线受理接入点](../a02-github-webhook.md)。生产协调器和任务库由 A-03 实现。
 
 ## 3. 当前阶段任务
 
@@ -28,7 +28,7 @@ A-01 已提供 GitHub 获取适配器，配置、校验策略与支持限制见 
 
 对原始 body 做 HMAC-SHA256 与 constant-time 比较，验证后解析和筛选 PR 事件，持久化 delivery 去重；先接 fake coordinator。
 交付事件路由、配置说明和单测。正确事件受理，无关事件忽略，错误/缺失签名或篡改 body 不调用协调器。
-重复事件不能重复执行；draft、关闭和 base 更新策略按 [决策记录](../decisions.md)确认。
+重复事件不能重复执行。已确认的 Q-08 事件策略和受理边界见 [A-02 接入说明](../a02-github-webhook.md#事件和响应)。
 
 ### A-03 · P0 · 任务协调、存储与查询
 

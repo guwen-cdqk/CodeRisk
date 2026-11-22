@@ -61,7 +61,7 @@ B 的同步分析由 A 放在线程执行；async 本身不会自动把 CPU 工�
 | GET /api/v1/tasks/{task_id} | 示例任务或 404 | 真实 ReviewTask；无任务 404 |
 | GET /api/v1/tasks/{task_id}/report | 示例报告或 404 | 真实报告；有任务未生成报告时 409 REPORT_NOT_READY |
 | POST /api/v1/reviews | 合法请求返回 501 | 输入 repository/pr_number，202 ReviewTask；重复返回已有任务 |
-| POST /api/v1/webhooks/github | 未注册，404 | 验签接收；支持事件 202，无关事件 204，错误签名 401 |
+| POST /api/v1/webhooks/github | 已注册，无关事件 204，错误签名 401。默认装配对需受理的合法事件返回 503 | 注入持久化协调器后，可靠受理返回 202，见 [A-02 接入说明](a02-github-webhook.md) |
 | POST /api/v1/tasks/{task_id}/retry | 未注册，404 | 拟议接口，见 [Q-07](decisions.md#q07) |
 
 OpenAPI 虽声明 POST /reviews 的成功模型为 202，目前函数仍返回 501。关闭 Mock 后读取为 503；A 还需替换 store_for 和依赖装配。

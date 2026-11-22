@@ -6,16 +6,20 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
-from app.api.routes.reviews import router
+from app.api.routes.reviews import router as reviews_router
+from app.api.routes.webhooks import router as webhooks_router
 from app.core.config import Settings, configure_logging
 from app.core.errors import ModuleError
 from app.schemas.models import ErrorDetail, ErrorResponse, HealthResponse
 from app.services.mock_store import MockReadStore
+from app.services.webhook_deliveries import WebhookDeliveryStore, WebhookSubmitter
 
 logger = logging.getLogger("coderisk")
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None, *, webhook_submitter: WebhookSubmitter | None = None
+) -> FastAPI:
     settings = settings or Settings()
     configure_logging(settings.log_level)
     application = FastAPI(
@@ -25,6 +29,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     application.state.settings = settings
     application.state.mock_store = MockReadStore()
+    application.state.webhook_submitter = webhook_submitter
+    application.state.webhook_deliveries = WebhookDeliveryStore(settings.github_webhook_delivery_db)
 
     def error_response(request: Request, status: int, error: ErrorDetail) -> JSONResponse:
         request_id = getattr(request.state, "request_id", str(uuid4()))
@@ -82,7 +88,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             service=settings.app_name, mode="mock" if settings.mock_enabled else "unconfigured"
         )
 
-    application.include_router(router)
+    application.include_router(reviews_router)
+    application.include_router(webhooks_router)
     return application
 
 

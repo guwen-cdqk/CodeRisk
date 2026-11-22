@@ -67,7 +67,8 @@ C 汇总协调，接口变化和阻塞及时沟通，不等周会。不用“完
 
 当前后端读取 CODERISK_APP_NAME、CODERISK_LOG_LEVEL、CODERISK_MOCK_ENABLED，另有 A-01 的
 [CODERISK_GITHUB_ALLOWED_REPOSITORIES](a01-github-fetch.md#使用与配置)；根 .env 与环境变量生效，环境变量优先，改后重启。
-GITHUB_TOKEN、GITHUB_WEBHOOK_SECRET、LLM_API_KEY/BASE_URL/MODEL 只是 .env.example 的预留项，尚未实现读取。
+GitHub Webhook 使用 [CODERISK_GITHUB_WEBHOOK_SECRET 和 CODERISK_GITHUB_WEBHOOK_DELIVERY_DB](a02-github-webhook.md#本地配置)。
+GITHUB_TOKEN、LLM_API_KEY/BASE_URL/MODEL 是 .env.example 的预留项，应用入口尚未装配这些凭证。
 Vite 代理使用启动进程的 CODERISK_API_TARGET，默认本机 8000；不假设后端 .env 自动传给前端。
 
 只提交 .env.example，不提交凭证、私有原始样例、虚拟环境、node_modules、dist 或个人笔记；笔记放忽略的 docs/local/。
